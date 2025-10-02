@@ -1,0 +1,64 @@
+class Context:
+    def __init__(self, name, parent=None):
+        self.name = name
+        self.parent = parent
+        self.children = []
+        self.active = False
+        if parent:
+            parent.children.append(self)
+
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
+
+    def handle_event(self, event, data=None):
+        if not self.active:
+            return False
+        handled = self.on_event(event, data)
+        if handled:
+            return True
+        if self.parent:
+            return self.parent.handle_event(event, data)
+        return False
+
+    def on_event(self, event, data):
+        return False
+
+
+class MainMenu(Context):
+    def on_event(self, event, data):
+        if event == "message" and data == "/start":
+            print("Показать главное меню")
+            return True
+        return False
+
+class Settings(Context):
+    def on_event(self, event, data):
+        if event == "message" and data == "/settings":
+            print("Открыли настройки")
+            return True
+        return False
+
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils import executor
+
+bot = Bot("TOKEN")
+dp = Dispatcher(bot)
+
+# глобальный root-контекст
+root = Context("root")
+menu = MainMenu("menu", root)
+settings = Settings("settings", root)
+menu.activate()
+settings.activate()
+
+@dp.message_handler()
+async def on_message(message: types.Message):
+    handled = root.handle_event("message", message.text)
+    if not handled:
+        await message.answer("Не понял команду.")
+
+executor.start_polling(dp)
