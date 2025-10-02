@@ -1,64 +1,104 @@
-class Context:
-    def __init__(self, name, parent=None):
-        self.name = name
-        self.parent = parent
-        self.children = []
-        self.active = False
-        if parent:
-            parent.children.append(self)
-
-    def activate(self):
-        self.active = True
-
-    def deactivate(self):
-        self.active = False
-
-    def handle_event(self, event, data=None):
-        if not self.active:
-            return False
-        handled = self.on_event(event, data)
-        if handled:
-            return True
-        if self.parent:
-            return self.parent.handle_event(event, data)
-        return False
-
-    def on_event(self, event, data):
-        return False
-
-
-class MainMenu(Context):
-    def on_event(self, event, data):
-        if event == "message" and data == "/start":
-            print("Показать главное меню")
-            return True
-        return False
-
-class Settings(Context):
-    def on_event(self, event, data):
-        if event == "message" and data == "/settings":
-            print("Открыли настройки")
-            return True
-        return False
-
+from __future__ import annotations
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 
+
+class Scene:
+    """Base class for interaction scenes."""
+
+    def __init__(self, name: str, manager: "SceneManager") -> None:
+        self.name = name
+        self.manager = manager
+
+    async def enter(self) -> None:
+        """Called when the scene becomes active."""
+
+    async def exit(self) -> None:
+        """Called when the scene is no longer active."""
+
+    async def handle_message(self, message: types.Message) -> bool:
+        """Handle an incoming Telegram message."""
+        return False
+
+    async def request_transition(self, scene_name: str) -> None:
+        """Ask the manager to activate another scene."""
+        await self.manager.transition_to(scene_name)
+
+
+class SceneManager:
+    """Controls which scene is active, similar to Unity's SceneManager."""
+
+    def __init__(self) -> None:
+        self._scenes: dict[str, Scene] = {}
+        self._active_scene: Scene | None = None
+
+    def register(self, scene: Scene) -> None:
+        self._scenes[scene.name] = scene
+
+    async def transition_to(self, name: str) -> None:
+        if name not in self._scenes:
+            raise ValueError(f"Scene '{name}' is not registered")
+        if self._active_scene is self._scenes[name]:
+            return
+        if self._active_scene:
+            await self._active_scene.exit()
+        self._active_scene = self._scenes[name]
+        await self._active_scene.enter()
+
+    async def handle_message(self, message: types.Message) -> bool:
+        if not self._active_scene:
+            return False
+        return await self._active_scene.handle_message(message)
+
+
+class MainMenu(Scene):
+    async def enter(self) -> None:
+        # Could preload menu keyboards or content here
+        print("Активирована сцена главного меню")
+
+    async def handle_message(self, message: types.Message) -> bool:
+        if message.text == "/start":
+            await message.answer("Показать главное меню")
+            return True
+        if message.text == "/settings":
+            await message.answer("Переключаюсь на настройки")
+            await self.request_transition("settings")
+            return True
+        return False
+
+
+class Settings(Scene):
+    async def enter(self) -> None:
+        print("Активирована сцена настроек")
+
+    async def handle_message(self, message: types.Message) -> bool:
+        if message.text == "/settings":
+            await message.answer("Открыли настройки")
+            return True
+        if message.text == "/back":
+            await message.answer("Возврат в главное меню")
+            await self.request_transition("menu")
+            return True
+        return False
+
+
 bot = Bot("TOKEN")
 dp = Dispatcher(bot)
+scene_manager = SceneManager()
+scene_manager.register(MainMenu("menu", scene_manager))
+scene_manager.register(Settings("settings", scene_manager))
 
-# глобальный root-контекст
-root = Context("root")
-menu = MainMenu("menu", root)
-settings = Settings("settings", root)
-menu.activate()
-settings.activate()
+
+async def on_startup(dispatcher: Dispatcher) -> None:
+    await scene_manager.transition_to("menu")
+
 
 @dp.message_handler()
-async def on_message(message: types.Message):
-    handled = root.handle_event("message", message.text)
+async def on_message(message: types.Message) -> None:
+    handled = await scene_manager.handle_message(message)
     if not handled:
         await message.answer("Не понял команду.")
 
-executor.start_polling(dp)
+
+executor.start_polling(dp, on_startup=on_startup)
