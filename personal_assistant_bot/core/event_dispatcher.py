@@ -1,4 +1,8 @@
-from typing import Callable, Dict, List
+import logging
+from typing import Callable
+
+
+logger = logging.getLogger(__name__)
 
 
 class EventDispatcher:
@@ -6,7 +10,7 @@ class EventDispatcher:
         """
         Система управления событиями.
         """
-        self.listeners: Dict[str, List[Callable]] = {}
+        self.listeners: dict[str, list[Callable]] = {}
     
     def subscribe(self, event_name: str, handler: Callable) -> None:
         """
@@ -33,7 +37,7 @@ class EventDispatcher:
                 if not self.listeners[event_name]:
                     del self.listeners[event_name]
 
-    def emit(self, event_name: str, *args) -> None:
+    def emit(self, event_name: str, *args, **kwargs) -> None:
         """
         Публикует событие для всех подписчиков.
         
@@ -42,4 +46,8 @@ class EventDispatcher:
         """
         if event_name in self.listeners:
             for listener in self.listeners[event_name]:
-                listener(*args)
+                try:
+                    listener(*args, **kwargs)
+                except Exception as e:
+                    logger.error(f"{self.__class__.__name__}.emit({event_name}, {args=}, {kwargs=}) -> {e.__class__.__name__}: {e}")
+                    raise

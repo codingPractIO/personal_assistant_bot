@@ -31,7 +31,7 @@ def build_tree_from_config(config, node_classes: dict, event_dispatcher: EventDi
     # Создаём узел на основе его зарегистрированного класса
     root = node_class(event_dispatcher)
     for child_config in config.get("children", []):
-        child_node = build_tree_from_config(child_config, node_classes)
+        child_node = build_tree_from_config(child_config, node_classes, event_dispatcher)
         root.add_child(child_node)
 
     return root

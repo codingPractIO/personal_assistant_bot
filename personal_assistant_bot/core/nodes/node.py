@@ -42,7 +42,8 @@ class Node(IActivatable):
 
         # Активируем всех родителей
         if self.parent:
-            self.parent.activate()
+            if not self.parent.is_active:
+                self.parent.activate()
 
     def deactivate(self) -> None:
         """Деактивирует узел и рекурсивно деактивирует детей."""

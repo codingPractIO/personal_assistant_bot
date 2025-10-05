@@ -1,5 +1,5 @@
 import pytest
-from core.node_tree_builder import register_node_class, build_tree_from_config, NODE_CLASSES
+from core.nodes.node_tree_builder import register_node_class, build_tree_from_config, NODE_CLASSES
 from core import Node
 from app import tree_config  # Импортируем конфигурацию
 

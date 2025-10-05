@@ -1,6 +1,8 @@
-from core import Node, register_node_class
+from core import register_node_class
+
+from .user_node import UserNode
 
 
 @register_node_class
-class MainScreen(Node):
+class MainScreen(UserNode):
     pass
