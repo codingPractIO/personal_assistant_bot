@@ -27,7 +27,7 @@ def main():
 
     user_repository = UserRepository(users)
     user_controller = UserController(user_repository)  # or InitController?
-    context = Context(telegram_id=2, user_controller=user_controller)
+    context = Context(telegram_id=1, user_controller=user_controller)
 
     tree_root: UserNode = build_tree_from_config(tree_config.tree_config, node_tree_builder.NODE_CLASSES, event_dispatcher)
     tree_root.init(context)
@@ -37,7 +37,8 @@ def main():
 
     tree_root.activate()
 
-    event_dispatcher.emit(Events.message_text, "Hello, world!")
+    # event_dispatcher.emit(Events.message_text, "Hello, world!")
+    node_manager.handle({"type": "text", "text": "Hello, world!"})
 
 
 if __name__ == '__main__':

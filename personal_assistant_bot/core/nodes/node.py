@@ -40,11 +40,6 @@ class Node(IActivatable):
         if self.dispatcher:
             self.dispatcher.emit("NODE_ACTIVATED", {"node_name": self.name})
 
-        # Активируем всех родителей
-        if self.parent:
-            if not self.parent.is_active:
-                self.parent.activate()
-
     def deactivate(self) -> None:
         """Деактивирует узел и рекурсивно деактивирует детей."""
         if not self.__is_active:
@@ -56,10 +51,6 @@ class Node(IActivatable):
         # Уведомляем через диспетчер
         if self.dispatcher:
             self.dispatcher.emit("NODE_DEACTIVATED", {"node_name": self.name})
-        
-        # Рекурсивно деактивируем всех детей
-        for child in self.children:
-            child.deactivate()
 
     def to_readable_tree(self, level=0):
         """

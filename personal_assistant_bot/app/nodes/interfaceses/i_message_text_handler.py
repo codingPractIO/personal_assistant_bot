@@ -2,7 +2,7 @@ import logging
 
 from app.events import Events
 from .i_initable import IInitable
-from core.nodes import IActivatable
+from core.nodes import IActivatable, IHandler
 
 from typing import TYPE_CHECKING
 
@@ -10,18 +10,11 @@ from typing import TYPE_CHECKING
 logger = logging.getLogger(__name__)
 
 
-class IMessageTextHandler(IActivatable):
-    if TYPE_CHECKING:
-        from core import EventDispatcher
-        dispatcher: EventDispatcher
-
-    def activate(self) -> None:
-        super().activate()
-        self.dispatcher.subscribe(Events.message_text, self._handle_message)
-
-    def deactivate(self) -> None:
-        self.dispatcher.unsubscribe(Events.message_text, self._handle_message)
-        super().deactivate()
+class IMessageTextHandler(IHandler):
+    def handle(self, message, *args, **kwargs) -> bool:
+        if message['type'] != 'text':
+            return True
+        return False
 
     def _handle_message(self, message) -> None:
         logger.debug(f">>> {self.__class__.__name__}.handle_message({message})")
