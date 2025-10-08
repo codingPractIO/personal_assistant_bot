@@ -1,14 +1,33 @@
+from .nodes import (
+    Root,
+    Registration, Registration2, Registration3,
+    MainScreen,
+)
+from core.nodes.nodes_constants import (
+    CONSTRUCTOR,
+    CHILDREN,
+)
+
+
 tree_config = {
-    "name": "Root",
-    "children": [
+    CONSTRUCTOR: Root,
+    CHILDREN: [
         {
-            "name": "MainScreen",
-            "children": [
+            CONSTRUCTOR: MainScreen,
+            CHILDREN: [
             ],
         },
         {
-            "name": "Registration",
-            "children": [
+            CONSTRUCTOR: Registration,
+            CHILDREN: [
+                {
+                    CONSTRUCTOR: Registration2,
+                    CHILDREN: [
+                        {
+                            CONSTRUCTOR: Registration3,
+                        }
+                    ]
+                }
             ],
         },
     ],

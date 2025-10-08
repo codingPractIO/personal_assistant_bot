@@ -9,5 +9,4 @@ class UserRepository:
         return self.__users.get(telegram_id)
 
     def register(self, user: User) -> None:
-        user.registered = True
         self.__users[user.telegram_id] = user

@@ -63,7 +63,7 @@ def test_build_tree_from_config(node_classes):
     """Тест: Построение дерева из конфигурации."""
     
     # Строим дерево из конфигурации
-    tree = build_tree_from_config(TEST_CONFIG, node_classes)
+    tree = build_tree_from_config(TEST_CONFIG)
     
     # Проверяем, что корневой узел — тип RootNode
     assert isinstance(tree, RootNode)
@@ -105,7 +105,7 @@ def check_tree_structure(node, config):
 
 def test_tree_structure(node_classes):
     """Тест: структура построенного дерева соответствует конфигурации."""
-    tree = build_tree_from_config(TEST_CONFIG, node_classes)  # Создаём дерево на основе конфигурации
+    tree = build_tree_from_config(TEST_CONFIG)  # Создаём дерево на основе конфигурации
     
     # Проверяем, что структура дерева соответствует конфигурации
     check_tree_structure(tree, TEST_CONFIG)
@@ -120,7 +120,7 @@ def test_invalid_node_class(node_classes):
     
     # Проверяем, что при попытке построить дерево выбрасывается исключение
     with pytest.raises(ValueError, match="Unknown node class: UnknownNode"):
-        build_tree_from_config(invalid_config, node_classes)
+        build_tree_from_config(invalid_config)
 
 
 def test_invalid_structure(node_classes):
@@ -131,13 +131,13 @@ def test_invalid_structure(node_classes):
     }
     
     with pytest.raises(ValueError, match="Unknown node class: UnknownNode"):
-        build_tree_from_config(invalid_config, node_classes)
+        build_tree_from_config(invalid_config)
 
 
 def test_empty_tree(node_classes):
     """Тест: Пустая конфигурация создаёт дерево без детей."""
     empty_config = {"name": "RootNode", "children": []}
-    tree = build_tree_from_config(empty_config, node_classes)
+    tree = build_tree_from_config(empty_config)
     
     # Проверяем, что корневой узел создан корректно, но без детей
     assert isinstance(tree, RootNode)

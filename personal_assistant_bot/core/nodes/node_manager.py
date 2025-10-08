@@ -75,6 +75,8 @@ class NodeManager(IHandler):
                 break
 
     def _deactivate_node(self, name: str) -> None:
+        # todo: деактивировать в обратном порядке
+
         node = self._find_node(name)
         assert node
 

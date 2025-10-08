@@ -1,1 +1,1 @@
-from .user_controller import UserController
+from .registration_controller import RegistrationController

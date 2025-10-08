@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from app.controllers import UserController
+from core.controllers import IFactory
 
 
 @dataclass
 class Context:
     telegram_id: int
-    user_controller: UserController
+    factory: IFactory

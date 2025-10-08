@@ -1,5 +1,9 @@
+import logging
 from core import EventDispatcher
 from core.nodes.interfaces import IActivatable
+
+
+logger = logging.getLogger(__name__)
 
 
 class Node(IActivatable):
@@ -33,6 +37,7 @@ class Node(IActivatable):
     def activate(self) -> None:
         """Активирует узел и рекурсивно активирует всех родителей."""
         super().activate()
+        logger.debug(f"{self.__class__.__name__} ACTIVATED")
 
         self.__is_active = True
         
@@ -45,6 +50,7 @@ class Node(IActivatable):
         if not self.__is_active:
             return
         super().deactivate()
+        logger.debug(f"{self.__class__.__name__} DEACTIVATED")
 
         self.__is_active = False
         
